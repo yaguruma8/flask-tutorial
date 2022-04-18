@@ -1,4 +1,3 @@
-from pydoc import cli
 import sqlite3
 
 import click
@@ -29,8 +28,17 @@ def init_db():
         db.executescript(f.read().decode('utf8'))
 
 
+# カスタムコマンドの定義
+# シェルから flask init-db を実行可能にする
 @click.command('init-db')
 @with_appcontext
 def init_db_command():
     init_db()
     click.echo('Initialized the database.')
+
+
+# カスタムコマンドをアプリケーション（のインスタンス）に登録する関数
+# アプリケーションのインスタンスに対して設定する
+def init_app(app):
+    app.teardown_appcontext(close_db)
+    app.cli.add_command(init_db_command)
