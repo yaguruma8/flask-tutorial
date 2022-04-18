@@ -5,6 +5,8 @@ from flask import current_app, g
 from flask.cli import with_appcontext
 
 
+# データベースに接続する
+# 同じリクエスト中にすでに接続している場合は接続しているDBを返す
 def get_db():
     if 'db' not in g:
         g.db = sqlite3.connect(
@@ -15,12 +17,15 @@ def get_db():
     return g.db
 
 
+# データベースの接続を閉じる
 def close_db():
     db = g.pop('db', None)
     if db is not None:
         db.close()
 
 
+# データベースを初期化
+# 接続して指定したファイルを実行する
 def init_db():
     db = get_db()
 
