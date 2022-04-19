@@ -18,8 +18,9 @@ def get_db():
 
 
 # データベースの接続を閉じる
-def close_db():
+def close_db(e=None):
     db = g.pop('db', None)
+
     if db is not None:
         db.close()
 
