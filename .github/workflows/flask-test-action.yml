@@ -1,0 +1,14 @@
+name: flask-test
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'feature/**'
+
+jobs:
+  check-github-action-path:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'hello, github actions!'
+      - run: echo github.action_path
