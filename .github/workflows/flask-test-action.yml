@@ -20,4 +20,7 @@ jobs:
           python-version: '3.9.10'
       - name: Echo Version
         run: python --version
-
+      - name: Setup Flask
+        run: python -m pip install --upgrade pip
+        run: python -m pip install -r requirements.txt
+        run: flask --version
