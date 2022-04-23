@@ -12,3 +12,11 @@ jobs:
     steps:
       - name: Hello Actions
         run: echo 'hello, github actions!'
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9.10'
+        run: python --version
+
