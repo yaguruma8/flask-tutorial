@@ -1,0 +1,25 @@
+name: flask-test
+
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  test-running:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9.10'
+      - name: Setup Flask
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Install App on Dev Mode
+        run: python -m pip install -e .
+      - name: Run pytest
+        run: pytest

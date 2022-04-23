@@ -1,0 +1,25 @@
+# https://docs.github.com/ja/actions/learn-github-actions/understanding-github-actions
+# サンプルワークフローを作成する
+# name(option) GitHubリポジトリの[action]タブに表示されるワークフローの名前
+
+name: learn-github-acitons.yml
+# on ワークフローのトリガーとなるタイミングの指定 この場合はpushのたびに実行する
+on: [push]
+# jobs ワークフローで実行される全てのジョブをグループ化
+jobs:
+  # ジョブの名前
+  check-bats-version:
+    # runs-on ジョブを実行する仮想マシン（GitHubにホストされている）
+    runs-on: ubuntu-latest
+    # steps ジョブで実行される全てのステップをグループ化
+    steps:
+      # 用意されたアクションを使う
+      # checkout@v3 リポジトリをランナーにチェックアウトして実行可能にする
+      - uses: actions/checkout@v3
+      # setup-node@v3 withで指定したバージョンのnode.jsをインストールする
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+      # run ランナーでコマンドを実行するようにジョブに指示する
+      - run: npm install -g bats
+      - run: bats -v
