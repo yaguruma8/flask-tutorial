@@ -1,14 +1,30 @@
 name: flask-test
 
 on:
-  push:
-    branches:
-      - 'main'
-      - 'feature/**'
+  workflow_dispatch:
 
 jobs:
-  check-github-action-path:
+  test:
     runs-on: ubuntu-latest
     steps:
+      # 挨拶
+      - name: Greeting
       - run: echo 'hello, github actions!'
-      - run: echo github.action_path
+      # リポジトリにチェックアウト
+      - uses: actions/checkout@v3
+      # pythonのインストール
+      - name: Setup Python
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.9.10'
+      - run: python --version
+      # 必要なパッケージのインストール
+      - name: Setup Flask
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -r requirements.txt
+      # アプリケーションを開発モードでパッケージにする
+      - name: Install App on Dev Mode
+      - run: python -m pip install -e .
+      # テストを実行
+      - name: Pytest Running
+      - run: pytest
