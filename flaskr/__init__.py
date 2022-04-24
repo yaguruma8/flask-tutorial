@@ -33,4 +33,8 @@ def create_app(test_config=None):
     from . import db
     db.init_app(app)
 
+    # /authのブループリントをアプリケーションに登録
+    from . import bp_auth
+    app.register_blueprint(bp_auth.bp)
+
     return app
