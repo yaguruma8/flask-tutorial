@@ -1,6 +1,7 @@
 import os
 import tempfile
 
+from flask import Flask
 import pytest
 
 from flaskr import create_app
@@ -37,11 +38,11 @@ def app():
 
 # テストモードのアプリケーションからサーバーに接続せずにリクエストを作成
 @pytest.fixture
-def client(app):
+def client(app: Flask):
     return app.test_client()
 
 
 # アプリケーションに登録されているカスタムコマンドを実行可能にする
 @pytest.fixture
-def runner(app):
+def runner(app: Flask):
     return app.test_cli_runner()
