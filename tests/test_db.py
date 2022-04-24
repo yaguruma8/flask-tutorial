@@ -1,11 +1,13 @@
 import sqlite3
 
+from flask import Flask
 import pytest
 
 from flaskr.db import get_db
 
 
-def test_get_close_db(app):
+def test_get_close_db(app: Flask) -> None:
+    """get_db()のテスト"""
     # 同じコンテキスト内ではget_db()は常に同じ接続を返す
     with app.app_context():
         db = get_db()
