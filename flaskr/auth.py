@@ -72,6 +72,13 @@ def login():
     return 'auth/login.html'
 
 
+# ログアウト '/auth/logout'
+@bp.route('/logout')
+def logout():
+    session.clear()
+    return 'auth/logout'
+
+
 # リクエストがあったときにビューの関数よりも前に実行する関数を登録する
 @bp.before_app_request
 def load_logged_in_user():
