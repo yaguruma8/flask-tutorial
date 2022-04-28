@@ -1,6 +1,6 @@
 import functools
 
-from flask import Blueprint, flash, redirect, request, url_for, session, g
+from flask import Blueprint, flash, redirect, request, url_for, session, g, render_template
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from flaskr.db import get_db
@@ -41,7 +41,7 @@ def register():
         # エラーがあればフラッシュで表示して
         flash(error)
     # 登録画面に戻る（GETの場合はここだけ実行）
-    return 'auth/register.html'
+    return render_template('auth/register.html')
 
 
 # ログイン '/auth/login'を登録する
@@ -71,7 +71,7 @@ def login():
         # エラーがある場合はフラッシュ表示して
         flash(error)
     # ログイン画面に戻る（GETの場合はここだけ実行）
-    return 'auth/login.html'
+    return render_template('auth/login.html')
 
 
 # ログアウト '/auth/logout'
