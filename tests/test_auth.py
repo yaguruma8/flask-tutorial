@@ -1,5 +1,5 @@
 import pytest
-from flask import testing, Flask, session
+from flask import testing, Flask, session, g
 
 from flaskr.db import get_db
 
@@ -31,6 +31,14 @@ def test_register_validate(client: testing.FlaskClient, username, password, mess
 
 def test_login(client: testing.FlaskClient):
     assert client.get('/auth/login').status_code == 200
+    res = client.post(
+        '/auth/login', data={'username': 'test', 'password': 'test'})
+    assert res.headers['Location'] == '/'
+
+    with client:
+        client.get('/')
+        assert session['user-id'] == 1
+        assert g.user['username'] == 'test'
 
 
 def test_logout(client: testing.FlaskClient):
