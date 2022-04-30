@@ -1,7 +1,7 @@
 import os
 import tempfile
 
-from flask import Flask
+from flask import Flask, testing
 import pytest
 
 from flaskr import create_app
@@ -46,3 +46,24 @@ def client(app: Flask):
 @pytest.fixture
 def runner(app: Flask):
     return app.test_cli_runner()
+
+
+# ログイン・ログアウトを簡単に行うためのクラス
+class AuthAction(object):
+    def __init__(self, client: testing.FlaskClient) -> None:
+        self._client = client
+
+    def login(self, username='test', password='test'):
+        return self._client.post(
+            '/auth/login',
+            data={'username': username, 'password': password}
+        )
+
+    def logout(self):
+        return self._client.get('/auth/logout')
+
+
+# ログイン・ログアウトのフィクスチャ
+@pytest.fixture
+def auth(client: testing.FlaskClient):
+    return AuthAction(client)
