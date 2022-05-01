@@ -78,7 +78,7 @@ def login():
 @bp.route('/logout')
 def logout():
     session.clear()
-    return 'auth/logout'
+    return redirect(url_for('blog.index'))
 
 
 # リクエストがあったときにビューの関数よりも前に実行する関数を登録する
