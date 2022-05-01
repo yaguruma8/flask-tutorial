@@ -10,72 +10,73 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
 # 登録 '/auth/register' の処理を行う関数を登録
-@bp.route('/register', methods=('GET', 'POST'))
+@bp.get('/register')
 def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        db = get_db()
-        error = None
-
-        if not username:
-            # ユーザー名の欄が空
-            error = 'Username is required.'
-        elif not password:
-            # パスワード欄が空
-            error = 'Password is required.'
-        elif db.execute(
-            'SELECT id FROM user WHERE username = ?', (username,)
-        ).fetchone() is not None:
-            # すでに登録されているユーザー名
-            error = f"User {username} is already registerd."
-
-        # エラーが出なければ登録してログイン画面へ
-        if error is None:
-            db.execute(
-                'INSERT INTO user (username, password) VALUES (?, ?)',
-                (username, generate_password_hash(password))
-            )
-            db.commit()
-            return redirect(url_for('auth.login'))
-        # エラーがあればフラッシュで表示して
-        flash(error)
-    # 登録画面に戻る（GETの場合はここだけ実行）
     return render_template('auth/register.html')
 
 
-# ログイン '/auth/login'を登録する
-@bp.route('/login', methods=('GET', 'POST'))
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        db = get_db()
-        error = None
-        user = db.execute(
-            'SELECT * FROM user WHERE username = ?', (username,)
-        ).fetchone()
-        if user is None:
-            # ユーザー名が未登録
-            error = 'Incorrect username.'
-        elif not check_password_hash(user['password'], password):
-            # パスワードが正しくない
-            error = 'Incorrect password.'
+@bp.post('/register')
+def register_post():
+    username = request.form['username']
+    password = request.form['password']
+    db = get_db()
+    error = None
 
-        if error is None:
-            # エラーがなければセッションに登録してトップページにリダイレクト
-            session.clear()
-            session['user-id'] = user['id']
-            return redirect(url_for('index'))
+    # バリデーション
+    if not username:
+        error = 'Username is required.'
+    elif not password:
+        error = 'Password is required.'
+    elif db.execute(
+        'SELECT id FROM user WHERE username = ?', (username,)
+    ).fetchone() is not None:
+        error = f"User {username} is already registerd."
 
-        # エラーがある場合はフラッシュ表示して
+    if error is None:
+        db.execute(
+            'INSERT INTO user (username, password) VALUES (?, ?)',
+            (username, generate_password_hash(password))
+        )
+        db.commit()
+        return redirect(url_for('auth.login'))
+    else:
         flash(error)
-    # ログイン画面に戻る（GETの場合はここだけ実行）
+        return register()
+
+
+# ログイン '/auth/login'を登録する
+@bp.get('/login')
+def login():
     return render_template('auth/login.html')
 
 
+@bp.post('/login')
+def login_post():
+    username = request.form['username']
+    password = request.form['password']
+    db = get_db()
+    error = None
+    user = db.execute(
+        'SELECT * FROM user WHERE username = ?', (username,)
+    ).fetchone()
+
+    # バリデーション
+    if user is None:
+        error = 'Incorrect username.'
+    elif not check_password_hash(user['password'], password):
+        error = 'Incorrect password.'
+
+    if error is None:
+        session.clear()
+        session['user-id'] = user['id']
+        return redirect(url_for('blog.index'))
+    else:
+        flash(error)
+        return login()
+
+
 # ログアウト '/auth/logout'
-@bp.route('/logout')
+@bp.get('/logout')
 def logout():
     session.clear()
     return redirect(url_for('blog.index'))
@@ -103,10 +104,10 @@ def load_logged_in_user():
 # g.user がNone＝ログインしていない ので、auth.loginにリダイレクトする
 def login_required(view):
     @functools.wraps(view)
-    def wrapped_view(**kwargs):
+    def wrapped_view(*args, **kwargs):
         if g.user is None:
             return redirect(url_for('auth.login'))
 
-        return view(**kwargs)
+        return view(*args, **kwargs)
 
     return wrapped_view

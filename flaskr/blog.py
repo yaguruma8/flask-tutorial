@@ -8,7 +8,7 @@ bp = Blueprint('blog', __name__)
 
 
 # blog.index  /  ログインして最初に表示されるホーム
-@bp.route('/')
+@bp.get('/')
 def index():
     db = get_db()
     posts = db.execute(
@@ -20,65 +20,75 @@ def index():
 
 
 # blog.create /create 記事の作成　ログイン要
-@bp.route('/create', methods=('GET', 'POST'))
+@bp.get('/create')
 @login_required
 def create():
-    if request.method == 'POST':
-        title = request.form['title']
-        body = request.form['body']
-        error = None
-
-        if not title:
-            error = 'Title is required.'
-
-        if error is not None:
-            flash(error)
-        else:
-            db = get_db()
-            db.execute(
-                'INSERT INTO post (title, body, author_id)'
-                ' VALUES (?, ?, ?);',
-                (title, body, g.user['id'])
-            )
-            db.commit()
-            return redirect(url_for('blog.index'))
-
     return render_template('blog/create.html')
 
 
+@bp.post('/create')
+@login_required
+def create_post():
+    title = request.form['title']
+    body = request.form['body']
+    error = None
+
+    # バリデーション
+    if not title:
+        error = 'Title is required.'
+
+    if error is None:
+        db = get_db()
+        db.execute(
+            'INSERT INTO post (title, body, author_id)'
+            ' VALUES (?, ?, ?);',
+            (title, body, g.user['id'])
+        )
+        db.commit()
+        return redirect(url_for('blog.index'))
+    else:
+        flash(error)
+        return create()
+
+
 # blog.update  /<int:id>/update  記事を更新する　ログイン要
-@bp.route('/<int:id>/update', methods=('GET', 'POST'))
+@bp.get('/<int:id>/update')
 @login_required
 def update(id: int):
     post = get_post(id)
-
-    if request.method == 'POST':
-        title = request.form['title']
-        body = request.form['body']
-        error = None
-
-        if not title:
-            error = 'Title is required.'
-
-        if error is not None:
-            flash(error)
-        else:
-            db = get_db()
-            db.execute(
-                'UPDATE post SET title = ?, body = ?'
-                ' WHERE id = ?',
-                (title, body, id)
-            )
-            db.commit()
-            return redirect(url_for('blog.index'))
-
     return render_template('blog/update.html', post=post)
 
 
-# blog.delete /<int:id>/delete 記事を削除する　ログイン要
-@bp.route('/<int:id>/delete', methods=('POST',))
+@bp.post('/<int:id>/update')
 @login_required
-def delete(id: int):
+def update_post(id: int):
+    get_post(id)
+    title = request.form['title']
+    body = request.form['body']
+    error = None
+
+    # バリデーション
+    if not title:
+        error = 'Title is required.'
+
+    if error is None:
+        db = get_db()
+        db.execute(
+            'UPDATE post SET title = ?, body = ?'
+            ' WHERE id = ?',
+            (title, body, id)
+        )
+        db.commit()
+        return redirect(url_for('blog.index'))
+    else:
+        flash(error)
+        return update(id)
+
+
+# blog.delete /<int:id>/delete 記事を削除する　ログイン要
+@bp.post('/<int:id>/delete')
+@login_required
+def delete_post(id: int):
     # アクセスが投稿者かどうか確認する（投稿者でなければ403）
     get_post(id)
     db = get_db()
