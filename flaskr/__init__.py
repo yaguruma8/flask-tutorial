@@ -34,11 +34,11 @@ def create_app(test_config=None):
     db.init_app(app)
 
     # /authのブループリントをアプリケーションに登録
-    from . import auth
-    app.register_blueprint(auth.bp)
+    from .routes import auth
+    app.register_blueprint(auth.bp, url_prefix='/auth')
 
     # blogのブループリントをアプリケーションに登録
-    from . import blog
+    from .routes import blog
     app.register_blueprint(blog.bp)
     app.add_url_rule('/', endpoint='index')
 

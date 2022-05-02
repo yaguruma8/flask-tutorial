@@ -6,12 +6,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flaskr.db import get_db
 
 
-bp = Blueprint('auth', __name__, url_prefix='/auth')
+bp = Blueprint('auth', __name__)
 
 
 # 登録 '/auth/register' の処理を行う関数を登録
 @bp.get('/register')
 def register():
+    print(request.url)
     return render_template('auth/register.html')
 
 

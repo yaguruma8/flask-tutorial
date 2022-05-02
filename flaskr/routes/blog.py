@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, g, redirect, url_f
 from werkzeug.exceptions import abort
 
 from flaskr.db import get_db
-from flaskr.auth import login_required
+from flaskr.routes.auth import login_required
 
 bp = Blueprint('blog', __name__)
 
