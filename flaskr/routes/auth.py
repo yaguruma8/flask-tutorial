@@ -12,7 +12,6 @@ bp = Blueprint('auth', __name__)
 # 登録 '/auth/register' の処理を行う関数を登録
 @bp.get('/register')
 def register():
-    print(request.url)
     return render_template('auth/register.html')
 
 
