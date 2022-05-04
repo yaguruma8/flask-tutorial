@@ -12,14 +12,14 @@ from flaskr.db import get_db
 # ログインしているとき - indexはログアウトのリンクを表示する
 def test_index(client: testing.FlaskClient, auth: AuthAction):
     res = client.get('/')
-    assert b'Log In' in res.data
+    assert b'Login' in res.data
     assert b'Register' in res.data
 
     auth.login()
     res = client.get('/')
-    assert b'Log Out' in res.data
+    assert b'Logout' in res.data
     assert b'test title' in res.data
-    assert b'by test on 2018-01-01' in res.data
+    assert b'by test' in res.data
     assert b'test\nbody' in res.data
     assert b'/1/update' in res.data
 
