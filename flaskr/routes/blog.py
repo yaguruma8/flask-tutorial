@@ -22,8 +22,8 @@ def index():
 # blog.article  /<int:id>/article  記事の詳細の表示
 @bp.get('/<int:id>/article')
 def article(id: int):
-    post = get_post(id)
-    return f'article.html Post:{post["id"]}'
+    post = get_post(id, check_author=False)
+    return render_template('blog/article.html', post=post)
 
 
 # blog.create /create 記事の作成　ログイン要
