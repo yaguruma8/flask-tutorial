@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}投稿の編集: "{{ post['title'][:10] }}..."{% endblock %}</h1>
+  <h1>{% block title %}Edit: "{{ post['title'][:10] }}..."{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
@@ -11,10 +11,10 @@
       value="{{ request.form['title'] or post['title'] }}" class="pure-input-1" required>
     <label for="body">Body</label>
     <textarea name="body" id="body" class="pure-input-1">{{ request.form['body'] or post['body'] }}</textarea>
-    <button type="submit" class="pure-button pure-button-primary">保存</button>
+    <button type="submit" class="pure-button pure-button-primary">Save</button>
   </form>
   <hr>
   <form action="{{ url_for('blog.delete_post', id=post['id']) }}" method="post" class="pure-form pure-form-stacked">
-    <button type="submit" onclick="return confirm('Are you sure?');" class="pure-button pure-button-primary">投稿を削除</button>
+    <button type="submit" onclick="return confirm('Are you sure?');" class="pure-button pure-button-primary button-danger">Delete Post</button>
   </form>
 {% endblock %}

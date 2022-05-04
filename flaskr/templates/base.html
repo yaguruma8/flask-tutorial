@@ -10,19 +10,20 @@
     <title>{% block title %}{% endblock %} - Flaskr</title>
   <head>
   <body>
-    <nav class="pure-menu pure-menu-horizontal">
-      <a href="{{ url_for('blog.index') }}" class="pure-menu-heading pure-menu-link">Flaskr</a>
-      <ul class="pure-menu-list">
-        {% if g.user %}
-          <li class="pure-menu-item"><span>{{ g.user['username'] }} [id:{{ g.user['id'] }}] でログイン中</span></li>
-          <li class="pure-menu-item"><a href="{{ url_for('auth.logout') }}" class="pure-menu-link">ログアウト</a></li>
-        {% else %}
-          <li class="pure-menu-item"><a href="{{ url_for('auth.register') }}" class="pure-menu-link">ユーザー登録</a></li>
-          <li class="pure-menu-item"><a href="{{ url_for('auth.login') }}" class="pure-menu-link">ログイン</a></li>
-        {% endif %}
-      </ul>
-    </nav>
-
+    <div class="menu-container">
+      <nav class="pure-menu pure-menu-horizontal menu-base">
+        <a href="{{ url_for('blog.index') }}" class="pure-menu-heading pure-menu-link">Flaskr</a>
+        <ul class="pure-menu-list menu-list">
+          {% if g.user %}
+            <li class="pure-menu-item"><span>{{ g.user['username'] }} [id:{{ g.user['id'] }}]</span></li>
+            <li class="pure-menu-item"><a href="{{ url_for('auth.logout') }}" class="pure-menu-link">Logout</a></li>
+          {% else %}
+            <li class="pure-menu-item"><a href="{{ url_for('auth.register') }}" class="pure-menu-link">Register</a></li>
+            <li class="pure-menu-item"><a href="{{ url_for('auth.login') }}" class="pure-menu-link">Login</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
     <main>
       <header>
         {% block header %}{% endblock %}
@@ -32,9 +33,11 @@
           {{ message }}
         </div>
       {% endfor %}
-      {% block content %}
-        <!-- content -->
-      {% endblock %}
+      <section class="content-container">
+        {% block content %}
+          <!-- content -->
+        {% endblock %}
+      </section>
     </main>
   </body>
 </html>

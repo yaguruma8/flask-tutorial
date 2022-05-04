@@ -24,3 +24,67 @@ nav ul li a, nav ul li span, header .action { display: block; padding: 0.5rem; }
 .content textarea { min-height: 12em; resize: vertical; }
 input.danger { color: #cc2f2e; }
 input[type=submit] { align-self: start; min-width: 10em; } */
+
+
+/* menu */
+.menu-container {
+  background-color: lightgray;
+  margin: 0;
+}
+.menu-base {
+  max-width: 740px;
+  margin: 0 auto;
+}
+
+.menu-list {
+  float: right;
+}
+
+/* main */
+main {
+  max-width: 740px;
+  margin: 0 auto;
+  padding: 0 1em;
+}
+
+/* page header */
+main > header > h1 {
+  color: #377ba8;
+  font-size: 2em;
+  font-weight: normal;
+}
+
+/* content */
+.content-container {
+  margin: 2em 0;
+}
+/* article */
+article {
+  margin: 0;
+  padding-bottom: 3em;
+}
+.article-date {
+  color: gray;
+  margin-bottom: 0.5em;
+  border-bottom: 1px solid lightgray;
+}
+.article-title {
+  margin: 0;
+  font-size: 1.5em;
+  font-weight: normal;
+  padding-bottom: 0.5em;
+}
+
+/* form */
+label {
+  color: gray;
+}
+
+textarea {
+  min-height: 12em;
+  resize: vertical;
+}
+
+.button-danger {
+  background-color: rgb(220, 53, 69);
+}

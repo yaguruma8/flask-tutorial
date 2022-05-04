@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}新規投稿を追加{% endblock %}</h1>
+  <h1>{% block title %}New Post{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
@@ -10,6 +10,6 @@
     <input name="title" id="title" value="{{ request.form['title'] }}" class="pure-input-1" required>
     <label for="body">Body</label>
     <textarea name="body" id="body" class="pure-input-1">{{ request.form['body'] }}</textarea>
-    <button type="submit" class="pure-button pure-button-primary">投稿を追加</button>
+    <button type="submit" class="pure-button pure-button-primary">Post</button>
   </form>
 {% endblock %}
