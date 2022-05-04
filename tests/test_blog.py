@@ -15,14 +15,14 @@ def test_index(client: testing.FlaskClient, auth: AuthAction):
     res = client.get('/')
     assert b'Login' in res.data
     assert b'Register' in res.data
-    assert b'/1/article' in res.data
+    assert b'/1' in res.data
 
     auth.login()
     res = client.get('/')
     assert b'Logout' in res.data
     assert b'test title' in res.data
     assert b'by test' in res.data
-    assert b'/1/article' in res.data
+    assert b'/1' in res.data
 
 
 # indexのテスト(2)
@@ -113,14 +113,14 @@ def test_delete(app: Flask, client: testing.FlaskClient, auth: AuthAction):
 # loginしてもしなくても記事の詳細は表示されるはず
 # loginしていればupdateへのリンクがあり、loginしてなければないはず
 def test_article(client: testing.FlaskClient, auth: AuthAction):
-    res = client.get('/1/article')
+    res = client.get('/1')
     assert b'test title' in res.data
     assert b'by test' in res.data
     assert b'test\nbody' in res.data
     assert b'/1/update' not in res.data
 
     auth.login()
-    res = client.get('/1/article')
+    res = client.get('/1')
     assert b'test title' in res.data
     assert b'by test' in res.data
     assert b'test\nbody' in res.data
