@@ -5,8 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/purecss@2.1.0/build/pure-min.css" integrity="sha384-yHIFVG6ClnONEA5yB5DJXfW2/KC173DIQrYoZMEtBvGzmf0PKiGyNEqe9N6BNDBH" crossorigin="anonymous">  
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
     <link rel="stylesheet" href="https://unpkg.com/purecss@2.1.0/build/grids-responsive-min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
     <title>{% block title %}{% endblock %} - Flaskr</title>
   <head>
   <body>
@@ -23,18 +23,18 @@
       </ul>
     </nav>
 
-    <section class="pure-g">
-      <header class="pure-u-1">
+    <main>
+      <header>
         {% block header %}{% endblock %}
       </header>
       {% for message in get_flashed_messages() %}
-        <div class="pure-u-1">
+        <div>
           {{ message }}
         </div>
       {% endfor %}
       {% block content %}
         <!-- content -->
       {% endblock %}
-    </section>
+    </main>
   </body>
 </html>
