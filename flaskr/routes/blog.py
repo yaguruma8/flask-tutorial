@@ -19,6 +19,13 @@ def index():
     return render_template('blog/index.html', posts=posts)
 
 
+# blog.article  /<int:id>/article  記事の詳細の表示
+@bp.get('/<int:id>/article')
+def article(id: int):
+    post = get_post(id)
+    return f'article.html Post:{post["id"]}'
+
+
 # blog.create /create 記事の作成　ログイン要
 @bp.get('/create')
 @login_required
