@@ -50,7 +50,7 @@ main {
 /* page header */
 main > header > h1 {
   color: #377ba8;
-  font-size: 2em;
+  font-size: 1.5em;
   font-weight: normal;
 }
 
@@ -68,11 +68,21 @@ article {
   margin-bottom: 0.5em;
   border-bottom: 1px solid lightgray;
 }
+.article-detail-date {
+  border-bottom: none;
+  /* margin-bottom: 0; */
+}
 .article-title {
   margin: 0;
   font-size: 1.5em;
   font-weight: normal;
   padding-bottom: 0.5em;
+}
+.article-user {
+  color: gray;
+}
+.article-body {
+  line-height: 1.8em;
 }
 
 /* form */
