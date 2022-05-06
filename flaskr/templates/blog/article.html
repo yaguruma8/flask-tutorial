@@ -13,8 +13,25 @@
       <section class="pure-u-1">
         <p class="article-body">{{ post['body'] }}</p>
         {% if g.user['id'] == post['author_id'] %}
-        <a href="{{ url_for('blog.update', id=post['id']) }}" class="pure-button">Edit</a>
+        <a href="{{ url_for('blog.update', id=post['id']) }}" class="pure-button pure-button-primary">Edit</a>
         {% endif %}
+      </section>
+      <hr>
+      <section class="pure-u-1">
+        <form method="post"
+        action="{{ url_for('blog.comment_create_post', id=post['id']) }}"
+        class="pure-form pure-form-stacked">
+          <label for="body">コメントする</label>
+            <input type="text" class="pure-input-1" name="body" id="body">
+          <button type="submit" class="pure-button">post</button>
+        </form>
+      </section>
+      <hr/>
+      <section class="pure-u-1">
+      <p>コメント一覧</p>
+      {% for comment in comments %}
+        <div class="comment-body">{{ comment['body']}} : {{ comment['created']}}</div>
+      {% endfor %}
       </section>
     </article>
 {% endblock %}

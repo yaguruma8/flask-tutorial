@@ -27,7 +27,14 @@ def index():
 @bp.get('/<int:id>')
 def article(id: int):
     post = get_post(id, check_author=False)
-    return render_template('blog/article.html', post=post)
+    # コメントの取得
+    # todo: 新しい順にする、ユーザー名を取得する
+    db = get_db()
+    comments = db.execute(
+        'SELECT * FROM comment WHERE post_id = ?;', (id,)
+    ).fetchall()
+
+    return render_template('blog/article.html', post=post, comments=comments)
 
 
 # blog.create /create 記事の作成　ログイン要
@@ -109,6 +116,33 @@ def delete_post(id: int):
     )
     db.commit()
     return redirect(url_for('blog.index'))
+
+
+# blog.comment_create_post /<int:id>/comment/create コメントを書き込む　ログイン要
+@bp.post('/<int:id>/comment/create')
+@login_required
+def comment_create_post(id: int):
+    body = request.form['body']
+    # todo: コメントの文字数チェック（上限を超えていたら登録しない）
+    # DB登録
+    db = get_db()
+    db.execute(
+        'INSERT INTO comment (post_id, commenter_id, body) '
+        ' VALUES (?, ?, ?);',
+        (id, g.user['id'], body)
+    )
+    db.commit()
+
+    return redirect(url_for('blog.article', id=id))
+
+
+# blog.comment_delete_post  /<int:id>/comment/<int:comment_id>/delete コメントを削除する　ログイン要
+@bp.post('/<int:id>/comment/<int:comment_id>/delete')
+@login_required
+def comment_delete_post(id: int, comment_id: int):
+    # コメントの削除など
+    # comment_id['commenter_id'] == g.user['id'] か確認
+    return redirect(url_for('blog.article', id=id))
 
 
 # 指定したidのpostを取得する
