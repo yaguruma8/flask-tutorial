@@ -135,8 +135,31 @@ def comment_create_post(id: int):
 @bp.post('/<int:id>/comment/<int:comment_id>/delete')
 @login_required
 def comment_delete_post(id: int, comment_id: int):
-    # コメントの削除など
-    # comment_id['commenter_id'] == g.user['id'] か確認
+    """指定したコメントIDのコメントを削除する"""
+
+    db = get_db()
+    comment = db.execute(
+        'SELECT post_id, commenter_id FROM comment WHERE id = ? ; ',
+        (comment_id,)
+    ).fetchone()
+    error = None
+
+    if comment is None:
+        error = 'comment is not exist.'
+    elif comment['post_id'] != id:
+        error = 'defferent post.'
+    elif comment['commenter_id'] != g.user['id']:
+        error = 'don\'t have permission to delete.'
+
+    if error is None:
+        db.execute(
+            'DELETE FROM comment WHERE id = ?;',
+            (comment_id,)
+        )
+        db.commit()
+    else:
+        flash(error)
+
     return redirect(url_for('blog.article', id=id))
 
 
@@ -148,7 +171,6 @@ def get_post(id: int, check_author: bool = True):
         ' WHERE p.id = ?',
         (id,)
     ).fetchone()
-
     if post is None:
         abort(404, f'Post id {id} doesn\'t exist.')
 
@@ -162,7 +184,7 @@ def get_comments(post_id: int) -> list:
     """指定したidの投稿へのコメントを新しい順で取得する"""
 
     comments = get_db().execute(
-        'SELECT c.id, c.commenter_id, c.created, c.body, u.username '
+        'SELECT c.id, c.post_id, c.commenter_id, c.created, c.body, u.username '
         ' FROM comment AS c '
         ' INNER JOIN user AS u '
         ' ON c.commenter_id = u.id '
