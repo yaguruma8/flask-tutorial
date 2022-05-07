@@ -27,12 +27,7 @@ def index():
 @bp.get('/<int:id>')
 def article(id: int):
     post = get_post(id, check_author=False)
-    # コメントの取得
-    # todo: 新しい順にする、ユーザー名を取得する
-    db = get_db()
-    comments = db.execute(
-        'SELECT * FROM comment WHERE post_id = ?;', (id,)
-    ).fetchall()
+    comments = get_comments(id)
 
     return render_template('blog/article.html', post=post, comments=comments)
 
@@ -161,3 +156,19 @@ def get_post(id: int, check_author: bool = True):
         abort(403)
 
     return post
+
+
+def get_comments(post_id: int) -> list:
+    """指定したidの投稿へのコメントを新しい順で取得する"""
+
+    comments = get_db().execute(
+        'SELECT c.id, c.commenter_id, c.created, c.body, u.username '
+        ' FROM comment AS c '
+        ' INNER JOIN user AS u '
+        ' ON c.commenter_id = u.id '
+        ' WHERE c.post_id = ? '
+        ' ORDER BY c.created DESC; ',
+        (post_id,)
+    ).fetchall()
+
+    return comments
