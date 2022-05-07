@@ -21,7 +21,7 @@
         <form method="post"
         action="{{ url_for('blog.comment_create_post', id=post['id']) }}"
         class="pure-form pure-form-stacked">
-          <label for="body">コメントする</label>
+          <label for="body">コメント(100字以内)</label>
             <input type="text" class="pure-input-1" name="body" id="body">
           <button type="submit" class="pure-button">post</button>
         </form>
@@ -30,7 +30,18 @@
       <section class="pure-u-1">
       <p>コメント一覧</p>
       {% for comment in comments %}
-        <div class="comment-body">{{ comment['body']}} : {{ comment['created']}}</div>
+        <div class="comment-body">
+          {{ comment['body']}} : 
+          {{ comment['created']}} : 
+          {{ comment['username']}} : 
+          {% if g.user['id'] == comment['commenter_id'] %}
+          <form 
+            action="{{ url_for('blog.comment_delete_post', id=comment['post_id'], c_id=comment['id']) }}" method="post"
+          >
+            <button type="submit">削除</button>
+          </form>
+          {% endif %}
+        </div>
       {% endfor %}
       </section>
     </article>
