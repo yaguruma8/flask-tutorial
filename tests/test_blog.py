@@ -125,3 +125,70 @@ def test_article(client: testing.FlaskClient, auth: AuthAction):
     assert b'by test' in res.data
     assert b'test\nbody' in res.data
     assert b'/1/update' in res.data
+
+
+# commentのテスト
+def test_comment(client: testing.FlaskClient, auth: AuthAction):
+    """コメントの表示のテスト"""
+    res = client.get('/1')
+    assert b'maxlength="40"' not in res.data
+
+    auth.login()
+    res = client.get('/1')
+    assert b'maxlength="40"' in res.data
+
+
+@pytest.mark.parametrize(('body', 'message'), (
+    ('', b'comment is empty.'),
+    ('あいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあ', b'comment is too long.')
+))
+def test_comment_create_error(client: testing.FlaskClient, auth: AuthAction, body, message):
+    """コメント入力エラーのテスト"""
+    auth.login()
+
+    res = client.post('/1/comment/create', data={'body': body})
+    assert message in res.data
+
+
+def test_comment_create(app: Flask, client: testing.FlaskClient, auth: AuthAction):
+    """コメント入力のテスト"""
+    auth.login()
+
+    client.post('/1/comment/create', data={'body': 'Hello, Good-bye.'})
+    with app.app_context():
+        db = get_db()
+        comment = db.execute('SELECT * FROM comment WHERE id = 2').fetchone()
+        assert comment['body'] == 'Hello, Good-bye.'
+
+
+def test_comment_delete_error(client: testing.FlaskClient, auth: AuthAction):
+    """コメント削除エラー（存在しないコメント）のテスト"""
+    auth.login()
+
+    res = client.post('/1/comment/2/delete')
+    assert b'comment is not exist.' in res.data
+
+
+def test_comment_delete_error2(app: Flask, client: testing.FlaskClient, auth: AuthAction):
+    """コメント削除エラー（コメント投稿者と異なるユーザー）のテスト"""
+    with app.app_context():
+        db = get_db()
+        db.execute('UPDATE comment SET commenter_id = 2 WHERE id = 1')
+        db.commit()
+
+    auth.login()
+
+    res = client.post('/1/comment/1/delete')
+    assert b'permission to delete.' in res.data
+
+
+def test_comment_delete(app: Flask, client: testing.FlaskClient, auth: AuthAction):
+    """コメント削除のテスト"""
+    auth.login()
+    res = client.post('/1/comment/1/delete')
+    assert res.headers['Location'] == '/1'
+
+    with app.app_context():
+        db = get_db()
+        comment = db.execute('SELECT * FROM comment WHERE id = 1').fetchone()
+        assert comment is None
