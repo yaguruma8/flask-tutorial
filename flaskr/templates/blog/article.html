@@ -16,17 +16,17 @@
         <a href="{{ url_for('blog.update', id=post['id']) }}" class="pure-button pure-button-primary">Edit</a>
         {% endif %}
       </section>
-      <hr>
+      {% if g.user['id'] %}
       <section class="pure-u-1">
         <form method="post"
         action="{{ url_for('blog.comment_create_post', id=post['id']) }}"
         class="pure-form pure-form-stacked">
-          <label for="body">コメント(40字以内)</label>
+          <label for="body">コメントする(40字以内)</label>
             <input type="text" class="pure-input-1" name="body" id="body" maxlength="40">
-          <button type="submit" class="pure-button">post</button>
+          <button type="submit" class="pure-button">comment</button>
         </form>
       </section>
-      <hr/>
+      {% endif %}
       <section class="pure-u-1">
       <p>コメント({{ comments | length }})</p>
       {% for comment in comments %}
