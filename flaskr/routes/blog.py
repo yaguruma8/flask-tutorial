@@ -135,10 +135,10 @@ def comment_create_post(id: int):
             (id, g.user['id'], body)
         )
         db.commit()
+        return redirect(url_for('blog.article', id=id))
     else:
         flash(error)
-
-    return redirect(url_for('blog.article', id=id))
+        return article(id)
 
 
 # blog.comment_delete_post  /<int:id>/comment/<int:comment_id>/delete コメントを削除する　ログイン要
@@ -167,10 +167,11 @@ def comment_delete_post(id: int, comment_id: int):
             (comment_id,)
         )
         db.commit()
+        return redirect(url_for('blog.article', id=id))
     else:
         flash(error)
+        return article(id)
 
-    return redirect(url_for('blog.article', id=id))
 
 
 # 指定したidのpostを取得する
