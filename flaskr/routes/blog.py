@@ -117,16 +117,26 @@ def delete_post(id: int):
 @bp.post('/<int:id>/comment/create')
 @login_required
 def comment_create_post(id: int):
+    """記事にコメントを登録する"""
+
     body = request.form['body']
-    # todo: コメントの文字数チェック（上限を超えていたら登録しない）
-    # DB登録
-    db = get_db()
-    db.execute(
-        'INSERT INTO comment (post_id, commenter_id, body) '
-        ' VALUES (?, ?, ?);',
-        (id, g.user['id'], body)
-    )
-    db.commit()
+    error = None
+
+    if not body:
+        error = 'comment is empty.'
+    elif len(body) > 40:
+        error = 'comment is too long.'
+
+    if error is None:
+        db = get_db()
+        db.execute(
+            'INSERT INTO comment (post_id, commenter_id, body) '
+            ' VALUES (?, ?, ?);',
+            (id, g.user['id'], body)
+        )
+        db.commit()
+    else:
+        flash(error)
 
     return redirect(url_for('blog.article', id=id))
 

@@ -21,8 +21,8 @@
         <form method="post"
         action="{{ url_for('blog.comment_create_post', id=post['id']) }}"
         class="pure-form pure-form-stacked">
-          <label for="body">コメント(100字以内)</label>
-            <input type="text" class="pure-input-1" name="body" id="body">
+          <label for="body">コメント(40字以内)</label>
+            <input type="text" class="pure-input-1" name="body" id="body" maxlength="40">
           <button type="submit" class="pure-button">post</button>
         </form>
       </section>
