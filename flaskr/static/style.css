@@ -78,8 +78,9 @@ article {
   font-weight: normal;
   padding-bottom: 0.5em;
 }
-.article-user {
+.article-user, .article-comment {
   color: gray;
+  margin: 0;
 }
 .article-body {
   line-height: 1.8em;

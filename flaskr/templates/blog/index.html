@@ -13,7 +13,8 @@
       <header class="pure-u-1">
           <div class="article-date">{{ post['created'].strftime('%Y-%m-%d %H:%M') }}</div>
           <h2 class="article-title">{{ post['title'] }}</h2>
-          <div class="article-user">by {{ post['username'] }}</div>
+          <p class="article-user">by {{ post['username'] }}</p>
+          <p class="article-comment">comment({{ post['comment_count'] }})</p>
       </header>
       <section class="pure-u-1">
         <p>{{ post['body'][:20] }}...</p>

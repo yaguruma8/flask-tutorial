@@ -12,9 +12,13 @@ bp = Blueprint('blog', __name__)
 def index():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, title, body, created, author_id, username'
-        ' FROM post p JOIN user u ON p.author_id = u.id'
-        ' ORDER BY created DESC'
+        'SELECT p.id, p.title, p.body, p.created, p.author_id, u.username, COALESCE(c.cnt, 0) AS comment_count '
+        ' FROM post AS p '
+        ' INNER JOIN user AS u '
+        ' ON p.author_id = u.id '
+        ' LEFT OUTER JOIN (SELECT post_id, count(*) AS cnt FROM comment GROUP BY post_id) AS c '
+        ' ON p.id = c.post_id '
+        ' ORDER BY p.created DESC; '
     ).fetchall()
     return render_template('blog/index.html', posts=posts)
 
@@ -23,7 +27,9 @@ def index():
 @bp.get('/<int:id>')
 def article(id: int):
     post = get_post(id, check_author=False)
-    return render_template('blog/article.html', post=post)
+    comments = get_comments(id)
+
+    return render_template('blog/article.html', post=post, comments=comments)
 
 
 # blog.create /create 記事の作成　ログイン要
@@ -107,6 +113,67 @@ def delete_post(id: int):
     return redirect(url_for('blog.index'))
 
 
+# blog.comment_create_post /<int:id>/comment/create コメントを書き込む　ログイン要
+@bp.post('/<int:id>/comment/create')
+@login_required
+def comment_create_post(id: int):
+    """記事にコメントを登録する"""
+
+    body = request.form['body']
+    error = None
+
+    if not body:
+        error = 'comment is empty.'
+    elif len(body) > 40:
+        error = 'comment is too long.'
+
+    if error is None:
+        db = get_db()
+        db.execute(
+            'INSERT INTO comment (post_id, commenter_id, body) '
+            ' VALUES (?, ?, ?);',
+            (id, g.user['id'], body)
+        )
+        db.commit()
+        return redirect(url_for('blog.article', id=id))
+    else:
+        flash(error)
+        return article(id)
+
+
+# blog.comment_delete_post  /<int:id>/comment/<int:comment_id>/delete コメントを削除する　ログイン要
+@bp.post('/<int:id>/comment/<int:comment_id>/delete')
+@login_required
+def comment_delete_post(id: int, comment_id: int):
+    """指定したコメントIDのコメントを削除する"""
+
+    db = get_db()
+    comment = db.execute(
+        'SELECT post_id, commenter_id FROM comment WHERE id = ? ; ',
+        (comment_id,)
+    ).fetchone()
+    error = None
+
+    if comment is None:
+        error = 'comment is not exist.'
+    elif comment['post_id'] != id:
+        error = 'defferent post.'
+    elif comment['commenter_id'] != g.user['id']:
+        error = 'don\'t have permission to delete.'
+
+    if error is None:
+        db.execute(
+            'DELETE FROM comment WHERE id = ?;',
+            (comment_id,)
+        )
+        db.commit()
+        return redirect(url_for('blog.article', id=id))
+    else:
+        flash(error)
+        return article(id)
+
+
+
 # 指定したidのpostを取得する
 def get_post(id: int, check_author: bool = True):
     post = get_db().execute(
@@ -115,7 +182,6 @@ def get_post(id: int, check_author: bool = True):
         ' WHERE p.id = ?',
         (id,)
     ).fetchone()
-
     if post is None:
         abort(404, f'Post id {id} doesn\'t exist.')
 
@@ -123,3 +189,19 @@ def get_post(id: int, check_author: bool = True):
         abort(403)
 
     return post
+
+
+def get_comments(post_id: int) -> list:
+    """指定したidの投稿へのコメントを新しい順で取得する"""
+
+    comments = get_db().execute(
+        'SELECT c.id, c.post_id, c.commenter_id, c.created, c.body, u.username '
+        ' FROM comment AS c '
+        ' INNER JOIN user AS u '
+        ' ON c.commenter_id = u.id '
+        ' WHERE c.post_id = ? '
+        ' ORDER BY c.created DESC; ',
+        (post_id,)
+    ).fetchall()
+
+    return comments
