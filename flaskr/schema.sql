@@ -1,6 +1,8 @@
 DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS post;
 DROP TABLE IF EXISTS comment;
+DROP TABLE IF EXISTS vote;
+
 
 CREATE TABLE user (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,3 +28,11 @@ CREATE TABLE comment (
   FOREIGN KEY (post_id) REFERENCES post (id),
   FOREIGN KEY (commenter_id) REFERENCES user (id)
 );
+
+CREATE TABLE vote (
+  post_id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,
+  intention INTEGER NOT NULL,
+  FOREIGN KEY (post_id) REFERENCES post (id),
+  FOREIGN KEY (user_id) REFERENCES user (id)
+)
