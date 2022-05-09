@@ -16,6 +16,12 @@
         <a href="{{ url_for('blog.update', id=post['id']) }}" class="pure-button pure-button-primary">Edit</a>
         {% endif %}
       </section>
+      <section class="pure-u-1">
+        <form action="{{ url_for('blog.vote_post', id=post['id']) }}" method="post">
+          <button name="intention" value="1">賛成</button>
+          <button name="intention" value="0">反対</button>
+        </form>
+      </section>
       {% if g.user['id'] %}
       <section class="pure-u-1">
         <form method="post"

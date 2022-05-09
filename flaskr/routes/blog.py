@@ -173,6 +173,20 @@ def comment_delete_post(id: int, comment_id: int):
         return article(id)
 
 
+@bp.post('/<int:id>/vote')
+@login_required
+def vote_post(id: int):
+    """投票をデータベースに登録する"""
+    intention = request.form['intention']
+    print(intention)
+    # todo: 投票済みかを確認してからINSERT
+    # db = get_db()
+    # db.execute(
+    #     'INSERT INTO vote (post_id, user_id, intention) VALUES (?, ?, ?);',
+    #     (id, g.user['id'], intention)
+    # )
+    return redirect(url_for('blog.article', id=id))
+
 
 # 指定したidのpostを取得する
 def get_post(id: int, check_author: bool = True):
