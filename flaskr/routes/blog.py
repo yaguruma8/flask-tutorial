@@ -179,11 +179,7 @@ def vote_post(id: int):
     """投票をデータベースに登録する"""
     intention = int(request.form['intention'])
     print(intention)
-    db = get_db()
-    vote = db.execute(
-        'SELECT * FROM vote WHERE post_id = ? AND user_id = ?',
-        (id, g.user['id'])
-    ).fetchone()
+    vote = get_vote(id)
     error = None
 
     # バリデーション
@@ -193,6 +189,7 @@ def vote_post(id: int):
         error = 'illegal value.'
 
     if error is None:
+        db = get_db()
         db.execute(
             'INSERT INTO vote (post_id, user_id, intention) VALUES (?, ?, ?);',
             (id, g.user['id'], intention)
@@ -235,3 +232,14 @@ def get_comments(post_id: int) -> list:
     ).fetchall()
 
     return comments
+
+
+def get_vote(post_id: int):
+    """指定したidの投稿への投票を取得する"""
+    vote = get_db().execute(
+        'SELECT * FROM vote '
+        ' WHERE post_id = ? AND user_id = ?',
+        (post_id, g.user['id'])
+    ).fetchone()
+
+    return vote
