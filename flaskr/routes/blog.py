@@ -28,8 +28,9 @@ def index():
 def article(id: int):
     post = get_post(id, check_author=False)
     comments = get_comments(id)
+    vote = get_vote(id)
 
-    return render_template('blog/article.html', post=post, comments=comments)
+    return render_template('blog/article.html', post=post, comments=comments, vote=vote)
 
 
 # blog.create /create 記事の作成　ログイン要
