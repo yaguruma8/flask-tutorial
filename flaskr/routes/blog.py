@@ -202,6 +202,15 @@ def vote_post(id: int):
         return article(id)
 
 
+@bp.post('/<int:id>/vote/cancel')
+@login_required
+def vote_cancel_post(id: int):
+    """投票を取り消す（DBから削除する）"""
+    vote = get_vote(id)
+    print('取り消しされました')
+    return redirect(url_for('blog.article', id=id))
+
+
 # 指定したidのpostを取得する
 def get_post(id: int, check_author: bool = True):
     post = get_db().execute(
