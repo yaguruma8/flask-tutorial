@@ -177,15 +177,31 @@ def comment_delete_post(id: int, comment_id: int):
 @login_required
 def vote_post(id: int):
     """投票をデータベースに登録する"""
-    intention = request.form['intention']
+    intention = int(request.form['intention'])
     print(intention)
-    # todo: 投票済みかを確認してからINSERT
-    # db = get_db()
-    # db.execute(
-    #     'INSERT INTO vote (post_id, user_id, intention) VALUES (?, ?, ?);',
-    #     (id, g.user['id'], intention)
-    # )
-    return redirect(url_for('blog.article', id=id))
+    db = get_db()
+    vote = db.execute(
+        'SELECT * FROM vote WHERE post_id = ? AND user_id = ?',
+        (id, g.user['id'])
+    ).fetchone()
+    error = None
+
+    # バリデーション
+    if vote is not None:
+        error = 'you are already vote.'
+    if intention < 0 or intention > 1:
+        error = 'illegal value.'
+
+    if error is None:
+        db.execute(
+            'INSERT INTO vote (post_id, user_id, intention) VALUES (?, ?, ?);',
+            (id, g.user['id'], intention)
+        )
+        db.commit()
+        return redirect(url_for('blog.article', id=id))
+    else:
+        flash(error)
+        return article(id)
 
 
 # 指定したidのpostを取得する
