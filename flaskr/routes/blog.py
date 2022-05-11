@@ -12,12 +12,20 @@ bp = Blueprint('blog', __name__)
 def index():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, p.title, p.body, p.created, p.author_id, u.username, COALESCE(c.cnt, 0) AS comment_count '
+        'SELECT p.id, p.title, p.body, p.created, p.author_id, u.username, COALESCE(c.cnt, 0) AS comment_count, '
+        ' COALESCE(v.agree,0) AS agree, COALESCE(v.disagree,0) AS disagree '
         ' FROM post AS p '
         ' INNER JOIN user AS u '
         ' ON p.author_id = u.id '
         ' LEFT OUTER JOIN (SELECT post_id, count(*) AS cnt FROM comment GROUP BY post_id) AS c '
         ' ON p.id = c.post_id '
+        ' LEFT OUTER JOIN ( '
+        ' SELECT post_id, '
+        ' SUM(CASE WHEN intention = 1 THEN 1 ELSE 0 END) AS agree, '
+        ' SUM(CASE WHEN intention = 0 THEN 1 ELSE 0 END) AS disagree '
+        ' FROM vote '
+        ' GROUP BY post_id ) AS v '
+        ' ON p.id = v.post_id '
         ' ORDER BY p.created DESC; '
     ).fetchall()
     return render_template('blog/index.html', posts=posts)

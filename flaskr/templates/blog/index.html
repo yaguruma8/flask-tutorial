@@ -15,6 +15,7 @@
           <h2 class="article-title">{{ post['title'] }}</h2>
           <p class="article-user">by {{ post['username'] }}</p>
           <p class="article-comment">comment({{ post['comment_count'] }})</p>
+          <p>賛成({{ post['agree'] }})/反対({{ post.disagree }})</p>
       </header>
       <section class="pure-u-1">
         <p>{{ post['body'][:20] }}...</p>
