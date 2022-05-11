@@ -216,8 +216,22 @@ def vote_post(id: int):
 def vote_cancel_post(id: int):
     """投票を取り消す（DBから削除する）"""
     vote = get_vote(id)
-    print('取り消しされました')
-    return redirect(url_for('blog.article', id=id))
+    error = None
+
+    if vote is None:
+        error = 'you are not vote.'
+
+    if error is None:
+        db = get_db()
+        db.execute(
+            'DELETE FROM vote WHERE post_id = ? AND user_id = ?',
+            (id, g.user['id'])
+        ).fetchone()
+        db.commit()
+        return redirect(url_for('blog.article', id=id))
+    else:
+        flash(error)
+        return article(id)
 
 
 # 指定したidのpostを取得する
