@@ -29,8 +29,17 @@ def article(id: int):
     post = get_post(id, check_author=False)
     comments = get_comments(id)
     vote = get_vote(id)
+    vote_result = get_db().execute(
+        'SELECT '
+        ' COALESCE(SUM(CASE WHEN intention = 1 THEN 1 ELSE 0 END), 0) AS agree, '
+        ' COALESCE(SUM(CASE WHEN intention = 0 THEN 1 ELSE 0 END), 0) AS disagree '
+        ' FROM vote '
+        ' WHERE post_id = ? ',
+        (id,)
+    ).fetchone()
 
-    return render_template('blog/article.html', post=post, comments=comments, vote=vote)
+    return render_template('blog/article.html',
+                           post=post, comments=comments, vote=vote, vote_result=vote_result)
 
 
 # blog.create /create 記事の作成　ログイン要
