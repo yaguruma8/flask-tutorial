@@ -276,6 +276,9 @@ def get_comments(post_id: int) -> list:
 
 def get_vote(post_id: int):
     """指定したidの投稿への投票を取得する"""
+    if g.user is None:
+        return None
+    
     vote = get_db().execute(
         'SELECT * FROM vote '
         ' WHERE post_id = ? AND user_id = ?',
