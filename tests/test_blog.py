@@ -240,5 +240,6 @@ def test_vote_view(client: testing.FlaskClient, auth: AuthAction):
     # 投票済の場合は投票取り消しボタンが表示される
     client.post('/1/vote', data={'intention': '1'})
     res = client.get('/1')
+    assert '賛成(1) 反対(0)' in res.get_data(as_text=True)
     assert '賛成に投票済' in res.get_data(as_text=True)
     assert '取り消す' in res.get_data(as_text=True)
