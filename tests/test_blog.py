@@ -11,11 +11,13 @@ from flaskr.db import get_db
 # ログインしていないとき - indexはログイン・登録のリンクを表示する
 # ログインしているとき - indexはログアウトのリンクを表示する
 # 22/5/4 仕様変更によりindexはarticleへのリンクを（loginしてなくても）表示するはず
+# 22/5/12 indexはvoteの票数を（loginしてなくても）表示するはず
 def test_index(client: testing.FlaskClient, auth: AuthAction):
     res = client.get('/')
     assert b'Login' in res.data
     assert b'Register' in res.data
     assert b'/1' in res.data
+    assert '賛成(0)/反対(0)' in res.get_data(as_text=True)
 
     auth.login()
     res = client.get('/')
@@ -192,3 +194,32 @@ def test_comment_delete(app: Flask, client: testing.FlaskClient, auth: AuthActio
         db = get_db()
         comment = db.execute('SELECT * FROM comment WHERE id = 1').fetchone()
         assert comment is None
+
+
+def test_vote(app: Flask, client: testing.FlaskClient, auth: AuthAction):
+    """投票のテスト"""
+    auth.login()
+    res = client.post('/1/vote', data={'intention': '1'})
+    assert res.headers['Location'] == '/1'
+
+    with app.app_context():
+        vote = get_db().execute('SELECT * FROM vote WHERE post_id = 1 AND user_id = 1').fetchone()
+        assert vote['intention'] == 1
+
+
+def test_vote_error(app: Flask, client: testing.FlaskClient, auth: AuthAction):
+    """投票のエラーのテスト"""
+    auth.login()
+    # postの値の不足
+    res = client.post('/1/vote')
+    assert res.status_code == 400
+
+    # 不正な値をpost
+    res = client.post('/1/vote', data={'intention': '2'})
+    assert b'illegal value.' in res.data
+
+    # 重複投票
+    with app.app_context():
+        client.post('/1/vote', data={'intention': '1'})
+        res = client.post('/1/vote', data={'intention': '0'})
+        assert b'you are already vote.' in res.data
