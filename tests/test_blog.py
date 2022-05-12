@@ -223,3 +223,22 @@ def test_vote_error(app: Flask, client: testing.FlaskClient, auth: AuthAction):
         client.post('/1/vote', data={'intention': '1'})
         res = client.post('/1/vote', data={'intention': '0'})
         assert b'you are already vote.' in res.data
+
+
+def test_vote_view(client: testing.FlaskClient, auth: AuthAction):
+    """投票の表示のテスト"""
+    # ログインしていなければ投票結果のみ
+    res = client.get('/1')
+    assert '賛成(0) 反対(0)' in res.get_data(as_text=True)
+    assert b'name="intention" value="1"' not in res.data
+
+    # ログインしていれば投票ボタンが表示される
+    auth.login()
+    res = client.get('/1')
+    assert b'name="intention" value="1"' in res.data
+
+    # 投票済の場合は投票取り消しボタンが表示される
+    client.post('/1/vote', data={'intention': '1'})
+    res = client.get('/1')
+    assert '賛成に投票済' in res.get_data(as_text=True)
+    assert '取り消す' in res.get_data(as_text=True)
