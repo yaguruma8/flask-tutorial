@@ -243,3 +243,23 @@ def test_vote_view(client: testing.FlaskClient, auth: AuthAction):
     assert '賛成(1) 反対(0)' in res.get_data(as_text=True)
     assert '賛成に投票済' in res.get_data(as_text=True)
     assert '取り消す' in res.get_data(as_text=True)
+
+
+def test_vote_cancel(app: Flask, client: testing.FlaskClient, auth: AuthAction):
+    """投票の取り消しのテスト"""
+    # preprocess
+    auth.login()
+    with app.app_context():
+        res = client.post('/1/vote', data={'intention': '1'})
+        vote = get_db().execute(
+            'SELECT * FROM vote WHERE post_id = 1 AND user_id = 1').fetchone()
+        assert vote is not None
+
+    # 投票を取り消しするとDBから削除される
+    res = client.post('/1/vote/cancel')
+    assert res.headers['Location'] == '/1'
+
+    with app.app_context():
+        vote = get_db().execute(
+            'SELECT * FROM vote WHERE post_id = 1 AND user_id = 1').fetchone()
+        assert vote is None
