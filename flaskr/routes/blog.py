@@ -12,12 +12,20 @@ bp = Blueprint('blog', __name__)
 def index():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, p.title, p.body, p.created, p.author_id, u.username, COALESCE(c.cnt, 0) AS comment_count '
+        'SELECT p.id, p.title, p.body, p.created, p.author_id, u.username, COALESCE(c.cnt, 0) AS comment_count, '
+        ' COALESCE(v.agree,0) AS agree, COALESCE(v.disagree,0) AS disagree '
         ' FROM post AS p '
         ' INNER JOIN user AS u '
         ' ON p.author_id = u.id '
         ' LEFT OUTER JOIN (SELECT post_id, count(*) AS cnt FROM comment GROUP BY post_id) AS c '
         ' ON p.id = c.post_id '
+        ' LEFT OUTER JOIN ( '
+        ' SELECT post_id, '
+        ' SUM(CASE WHEN intention = 1 THEN 1 ELSE 0 END) AS agree, '
+        ' SUM(CASE WHEN intention = 0 THEN 1 ELSE 0 END) AS disagree '
+        ' FROM vote '
+        ' GROUP BY post_id ) AS v '
+        ' ON p.id = v.post_id '
         ' ORDER BY p.created DESC; '
     ).fetchall()
     return render_template('blog/index.html', posts=posts)
@@ -28,8 +36,18 @@ def index():
 def article(id: int):
     post = get_post(id, check_author=False)
     comments = get_comments(id)
+    vote = get_vote(id)
+    vote_result = get_db().execute(
+        'SELECT '
+        ' COALESCE(SUM(CASE WHEN intention = 1 THEN 1 ELSE 0 END), 0) AS agree, '
+        ' COALESCE(SUM(CASE WHEN intention = 0 THEN 1 ELSE 0 END), 0) AS disagree '
+        ' FROM vote '
+        ' WHERE post_id = ? ',
+        (id,)
+    ).fetchone()
 
-    return render_template('blog/article.html', post=post, comments=comments)
+    return render_template('blog/article.html',
+                           post=post, comments=comments, vote=vote, vote_result=vote_result)
 
 
 # blog.create /create 記事の作成　ログイン要
@@ -173,6 +191,55 @@ def comment_delete_post(id: int, comment_id: int):
         return article(id)
 
 
+@bp.post('/<int:id>/vote')
+@login_required
+def vote_post(id: int):
+    """投票をデータベースに登録する"""
+    intention = request.form['intention']
+    vote = get_vote(id)
+    error = None
+
+    # バリデーション
+    if vote is not None:
+        error = 'you are already vote.'
+    if intention not in ('0', '1'):
+        error = 'illegal value.'
+
+    if error is None:
+        db = get_db()
+        db.execute(
+            'INSERT INTO vote (post_id, user_id, intention) VALUES (?, ?, ?);',
+            (id, g.user['id'], int(intention))
+        )
+        db.commit()
+        return redirect(url_for('blog.article', id=id))
+    else:
+        flash(error)
+        return article(id)
+
+
+@bp.post('/<int:id>/vote/cancel')
+@login_required
+def vote_cancel_post(id: int):
+    """投票を取り消す（DBから削除する）"""
+    vote = get_vote(id)
+    error = None
+
+    if vote is None:
+        error = 'you are not vote.'
+
+    if error is None:
+        db = get_db()
+        db.execute(
+            'DELETE FROM vote WHERE post_id = ? AND user_id = ?',
+            (id, g.user['id'])
+        ).fetchone()
+        db.commit()
+        return redirect(url_for('blog.article', id=id))
+    else:
+        flash(error)
+        return article(id)
+
 
 # 指定したidのpostを取得する
 def get_post(id: int, check_author: bool = True):
@@ -205,3 +272,17 @@ def get_comments(post_id: int) -> list:
     ).fetchall()
 
     return comments
+
+
+def get_vote(post_id: int):
+    """指定したidの投稿への投票を取得する"""
+    if g.user is None:
+        return None
+    
+    vote = get_db().execute(
+        'SELECT * FROM vote '
+        ' WHERE post_id = ? AND user_id = ?',
+        (post_id, g.user['id'])
+    ).fetchone()
+
+    return vote

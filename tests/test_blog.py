@@ -11,11 +11,13 @@ from flaskr.db import get_db
 # ログインしていないとき - indexはログイン・登録のリンクを表示する
 # ログインしているとき - indexはログアウトのリンクを表示する
 # 22/5/4 仕様変更によりindexはarticleへのリンクを（loginしてなくても）表示するはず
+# 22/5/12 indexはvoteの票数を（loginしてなくても）表示するはず
 def test_index(client: testing.FlaskClient, auth: AuthAction):
     res = client.get('/')
     assert b'Login' in res.data
     assert b'Register' in res.data
     assert b'/1' in res.data
+    assert '賛成(0)/反対(0)' in res.get_data(as_text=True)
 
     auth.login()
     res = client.get('/')
@@ -192,3 +194,82 @@ def test_comment_delete(app: Flask, client: testing.FlaskClient, auth: AuthActio
         db = get_db()
         comment = db.execute('SELECT * FROM comment WHERE id = 1').fetchone()
         assert comment is None
+
+
+def test_vote(app: Flask, client: testing.FlaskClient, auth: AuthAction):
+    """投票のテスト"""
+    auth.login()
+    res = client.post('/1/vote', data={'intention': '1'})
+    assert res.headers['Location'] == '/1'
+
+    with app.app_context():
+        vote = get_db().execute('SELECT * FROM vote WHERE post_id = 1 AND user_id = 1').fetchone()
+        assert vote['intention'] == 1
+
+
+def test_vote_error(app: Flask, client: testing.FlaskClient, auth: AuthAction):
+    """投票のエラーのテスト"""
+    auth.login()
+    # postの値の不足
+    res = client.post('/1/vote')
+    assert res.status_code == 400
+
+    # 不正な値をpost
+    res = client.post('/1/vote', data={'intention': '2'})
+    assert b'illegal value.' in res.data
+
+    # 重複投票
+    with app.app_context():
+        client.post('/1/vote', data={'intention': '1'})
+        res = client.post('/1/vote', data={'intention': '0'})
+        assert b'you are already vote.' in res.data
+
+
+def test_vote_view(client: testing.FlaskClient, auth: AuthAction):
+    """投票の表示のテスト"""
+    # ログインしていなければ投票結果のみ
+    res = client.get('/1')
+    assert '賛成(0) 反対(0)' in res.get_data(as_text=True)
+    assert b'name="intention" value="1"' not in res.data
+
+    # ログインしていれば投票ボタンが表示される
+    auth.login()
+    res = client.get('/1')
+    assert b'name="intention" value="1"' in res.data
+
+    # 投票済の場合は投票取り消しボタンが表示される
+    client.post('/1/vote', data={'intention': '1'})
+    res = client.get('/1')
+    assert '賛成(1) 反対(0)' in res.get_data(as_text=True)
+    assert '賛成に投票済' in res.get_data(as_text=True)
+    assert '取り消す' in res.get_data(as_text=True)
+
+
+def test_vote_cancel(app: Flask, client: testing.FlaskClient, auth: AuthAction):
+    """投票の取り消しのテスト"""
+    # preprocess
+    auth.login()
+    with app.app_context():
+        res = client.post('/1/vote', data={'intention': '1'})
+        vote = get_db().execute(
+            'SELECT * FROM vote WHERE post_id = 1 AND user_id = 1').fetchone()
+        assert vote is not None
+
+    # 投票を取り消しするとDBから削除される
+    res = client.post('/1/vote/cancel')
+    assert res.headers['Location'] == '/1'
+
+    # 投票を取り消した場合は再び記事詳細ページに投票ボタンが表示される
+    res = client.get('/1')
+    assert b'name="intention" value="1"' in res.data
+    assert '取り消す' not in res.get_data(as_text=True)
+
+    # データベースからは削除されている
+    with app.app_context():
+        vote = get_db().execute(
+            'SELECT * FROM vote WHERE post_id = 1 AND user_id = 1').fetchone()
+        assert vote is None
+
+    # 重複して削除しようとした場合はエラーになる
+    res = client.post('/1/vote/cancel')
+    assert b'you are not vote.' in res.data
