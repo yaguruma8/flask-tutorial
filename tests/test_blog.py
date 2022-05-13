@@ -259,7 +259,17 @@ def test_vote_cancel(app: Flask, client: testing.FlaskClient, auth: AuthAction):
     res = client.post('/1/vote/cancel')
     assert res.headers['Location'] == '/1'
 
+    # 投票を取り消した場合は再び記事詳細ページに投票ボタンが表示される
+    res = client.get('/1')
+    assert b'name="intention" value="1"' in res.data
+    assert '取り消す' not in res.get_data(as_text=True)
+
+    # データベースからは削除されている
     with app.app_context():
         vote = get_db().execute(
             'SELECT * FROM vote WHERE post_id = 1 AND user_id = 1').fetchone()
         assert vote is None
+
+    # 重複して削除しようとした場合はエラーになる
+    res = client.post('/1/vote/cancel')
+    assert b'you are not vote.' in res.data
