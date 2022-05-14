@@ -7,59 +7,27 @@
 {% block content %}
     <article class="pure-g">
       <header class="pure-u-1">
-        <div class="article-date article-detail-date">{{ post['created'].strftime('%Y-%m-%d %H:%M') }}</div>
-        <div class="article-user">by {{ post['username'] }}</div>
+        {# 日時、投稿者名 #}
+        {% include "blog/article/header.html" %}
       </header>
       <section class="pure-u-1">
+        {# 本文 #}
         <p class="article-body">{{ post['body'] }}</p>
         {% if g.user['id'] == post['author_id'] %}
         <a href="{{ url_for('blog.update', id=post['id']) }}" class="pure-button pure-button-primary">Edit</a>
         {% endif %}
       </section>
-      <hr />
       <section class="pure-u-1">
-        <div>
-          賛成({{ vote_result.agree }}) 反対({{ vote_result.disagree }})
-        </div>
-        {% if vote %}
-        <div>あなたは{% if vote.intention == 1 %}賛成{% else %}反対{% endif %}に投票済です。</div>
-        <form action="{{ url_for('blog.vote_cancel_post', id=post['id']) }}" method="post">
-          <button type="submit">取り消す</button>
-        </form>
-        {% elif g.user %}
-        <form action="{{ url_for('blog.vote_post', id=post['id']) }}" method="post">
-          <button name="intention" value="1">賛成</button>
-          <button name="intention" value="0">反対</button>
-        </form>
-        {% endif %}
+        {# 投票 #}
+        {% include "blog/article/vote.html" %}
       </section>
-      {% if g.user %}
       <section class="pure-u-1">
-        <form method="post"
-        action="{{ url_for('blog.comment_create_post', id=post['id']) }}"
-        class="pure-form pure-form-stacked">
-          <label for="body">コメントする(40字以内)</label>
-            <input type="text" class="pure-input-1" name="body" id="body" maxlength="40">
-          <button type="submit" class="pure-button">comment</button>
-        </form>
+        {# コメント投稿フォーム #}
+        {% include "blog/article/comment-post.html" %}
       </section>
-      {% endif %}
       <section class="pure-u-1">
-      <p>コメント({{ comments | length }})</p>
-      {% for comment in comments %}
-        <div class="comment-body">
-          {{ comment['body']}} : 
-          {{ comment['created']}} : 
-          {{ comment['username']}} : 
-          {% if g.user['id'] == comment['commenter_id'] %}
-          <form 
-            action="{{ url_for('blog.comment_delete_post', id=comment['post_id'], comment_id=comment['id']) }}" method="post"
-          >
-            <button type="submit">削除</button>
-          </form>
-          {% endif %}
-        </div>
-      {% endfor %}
+        {# コメント一覧 #}
+        {% include "blog/article/comments.html" %}
       </section>
     </article>
 {% endblock %}
