@@ -167,7 +167,10 @@ def test_comment_delete_error(client: testing.FlaskClient, auth: AuthAction):
     """コメント削除エラー（存在しないコメント）のテスト"""
     auth.login()
 
-    res = client.post('/1/comment/2/delete')
+    res = client.post('/1/comment/delete', data={'comment_id': '2'})
+    assert b'comment is not exist.' in res.data
+
+    res = client.post('/1/comment/delete', data={'comment_id': 'hello'})
     assert b'comment is not exist.' in res.data
 
 
@@ -180,14 +183,14 @@ def test_comment_delete_error2(app: Flask, client: testing.FlaskClient, auth: Au
 
     auth.login()
 
-    res = client.post('/1/comment/1/delete')
+    res = client.post('/1/comment/delete', data={'comment_id': '1'})
     assert b'permission to delete.' in res.data
 
 
 def test_comment_delete(app: Flask, client: testing.FlaskClient, auth: AuthAction):
     """コメント削除のテスト"""
     auth.login()
-    res = client.post('/1/comment/1/delete')
+    res = client.post('/1/comment/delete', data={'comment_id': '1'})
     assert res.headers['Location'] == '/1'
 
     with app.app_context():

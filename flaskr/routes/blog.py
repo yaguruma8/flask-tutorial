@@ -110,7 +110,7 @@ def update_post(id: int):
             (title, body, id)
         )
         db.commit()
-        return redirect(url_for('blog.index'))
+        return redirect(url_for('blog.article', id=id))
     else:
         flash(error)
         return update(id)
@@ -159,12 +159,13 @@ def comment_create_post(id: int):
         return article(id)
 
 
-# blog.comment_delete_post  /<int:id>/comment/<int:comment_id>/delete コメントを削除する　ログイン要
-@bp.post('/<int:id>/comment/<int:comment_id>/delete')
+# blog.comment_delete_post  /<int:id>/comment/delete コメントを削除する　ログイン要
+@bp.post('/<int:id>/comment/delete')
 @login_required
-def comment_delete_post(id: int, comment_id: int):
+def comment_delete_post(id: int):
     """指定したコメントIDのコメントを削除する"""
 
+    comment_id = request.form['comment_id']
     db = get_db()
     comment = db.execute(
         'SELECT post_id, commenter_id FROM comment WHERE id = ? ; ',
