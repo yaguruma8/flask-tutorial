@@ -6,9 +6,15 @@
     {{ comment['username']}} : 
     {% if g.user['id'] == comment['commenter_id'] %}
     <form 
-      action="{{ url_for('blog.comment_delete_post', id=comment['post_id'], comment_id=comment['id']) }}" method="post"
+      action="{{ url_for('blog.comment_delete_post', id=comment['post_id']) }}"
+      method="post"
     >
-      <button type="submit">削除</button>
+      <button
+        type="submit"
+        onclick="return confirm('Are you sure?');"
+        name="comment_id" value="{{ comment['id'] }}">
+          削除
+      </button>
     </form>
     {% endif %}
   </div>
