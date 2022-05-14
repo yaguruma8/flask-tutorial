@@ -110,7 +110,7 @@ def update_post(id: int):
             (title, body, id)
         )
         db.commit()
-        return redirect(url_for('blog.index'))
+        return redirect(url_for('blog.article', id=id))
     else:
         flash(error)
         return update(id)
