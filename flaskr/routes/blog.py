@@ -38,8 +38,6 @@ def article(id: int):
         ' WHERE post_id = ?',
         (id,)
     ).fetchone()
-    if vote_count is None:
-        vote_count = {'agree': 0, 'disagree': 0}
 
     return render_template('blog/article.html',
                            post=post, comments=comments, vote=vote, vote_count=vote_count)

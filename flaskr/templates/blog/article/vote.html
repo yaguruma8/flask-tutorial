@@ -1,6 +1,6 @@
 
 <div>
-  賛成({{ vote_count.agree }}) 反対({{ vote_count.disagree }})
+  賛成({{ vote_count.agree | default('0', true) }}) 反対({{ vote_count.disagree | default('0', true) }})
 </div>
 
 {% if g.user %}
