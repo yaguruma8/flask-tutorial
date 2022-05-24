@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS post;
 DROP TABLE IF EXISTS comment;
 DROP TABLE IF EXISTS vote;
+DROP VIEW IF EXISTS vote_count;
 
 -- テーブル定義
 CREATE TABLE user (
@@ -36,6 +37,20 @@ CREATE TABLE vote (
   FOREIGN KEY (post_id) REFERENCES post (id),
   FOREIGN KEY (user_id) REFERENCES user (id)
 );
+
+-- ビュー定義
+-- 投票数のまとめ
+CREATE VIEW vote_count (post_id, agree, disagree)
+AS
+  SELECT
+    post_id,
+    COALESCE(SUM(CASE WHEN intention = 1 THEN 1 ELSE 0 END), 0),
+    COALESCE(SUM(CASE WHEN intention = 0 THEN 1 ELSE 0 END), 0)
+  FROM vote
+  GROUP BY post_id
+;
+
+
 
 -- 初期データ
 -- ユーザー
