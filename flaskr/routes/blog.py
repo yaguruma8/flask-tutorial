@@ -17,7 +17,7 @@ def index():
         ' FROM post AS p '
         ' INNER JOIN user AS u '
         ' ON p.author_id = u.id '
-        ' LEFT OUTER JOIN (SELECT post_id, count(*) AS cnt FROM comment GROUP BY post_id) AS c '
+        ' LEFT OUTER JOIN comment_count AS c '
         ' ON p.id = c.post_id '
         ' LEFT OUTER JOIN vote_count AS v '
         ' ON p.id = v.post_id '

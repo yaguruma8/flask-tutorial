@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS post;
 DROP TABLE IF EXISTS comment;
 DROP TABLE IF EXISTS vote;
 DROP VIEW IF EXISTS vote_count;
+DROP VIEW IF EXISTS comment_count;
 
 -- テーブル定義
 CREATE TABLE user (
@@ -39,7 +40,17 @@ CREATE TABLE vote (
 );
 
 -- ビュー定義
--- 投票数のまとめ
+-- 投稿ごとのコメント数
+CREATE VIEW comment_count (post_id, cnt)
+AS
+  SELECT
+    post_id,
+    count(*)
+  FROM comment
+  GROUP BY post_id
+;
+
+-- 投稿ごとの投票数
 CREATE VIEW vote_count (post_id, agree, disagree)
 AS
   SELECT
