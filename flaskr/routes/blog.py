@@ -12,21 +12,8 @@ bp = Blueprint('blog', __name__)
 def index():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, p.title, p.body, p.created, p.author_id, u.username, COALESCE(c.cnt, 0) AS comment_count, '
-        ' COALESCE(v.agree,0) AS agree, COALESCE(v.disagree,0) AS disagree '
-        ' FROM post AS p '
-        ' INNER JOIN user AS u '
-        ' ON p.author_id = u.id '
-        ' LEFT OUTER JOIN (SELECT post_id, count(*) AS cnt FROM comment GROUP BY post_id) AS c '
-        ' ON p.id = c.post_id '
-        ' LEFT OUTER JOIN ( '
-        ' SELECT post_id, '
-        ' SUM(CASE WHEN intention = 1 THEN 1 ELSE 0 END) AS agree, '
-        ' SUM(CASE WHEN intention = 0 THEN 1 ELSE 0 END) AS disagree '
-        ' FROM vote '
-        ' GROUP BY post_id ) AS v '
-        ' ON p.id = v.post_id '
-        ' ORDER BY p.created DESC; '
+        'SELECT * FROM all_posts '
+        ' ORDER BY created DESC; '
     ).fetchall()
     return render_template('blog/index.html', posts=posts)
 
@@ -37,17 +24,15 @@ def article(id: int):
     post = get_post(id, check_author=False)
     comments = get_comments(id)
     vote = get_vote(id)
-    vote_result = get_db().execute(
-        'SELECT '
-        ' COALESCE(SUM(CASE WHEN intention = 1 THEN 1 ELSE 0 END), 0) AS agree, '
-        ' COALESCE(SUM(CASE WHEN intention = 0 THEN 1 ELSE 0 END), 0) AS disagree '
-        ' FROM vote '
-        ' WHERE post_id = ? ',
+    vote_count = get_db().execute(
+        'SELECT agree, disagree '
+        ' FROM vote_count '
+        ' WHERE post_id = ?',
         (id,)
     ).fetchone()
 
     return render_template('blog/article.html',
-                           post=post, comments=comments, vote=vote, vote_result=vote_result)
+                           post=post, comments=comments, vote=vote, vote_count=vote_count)
 
 
 # blog.create /create 記事の作成　ログイン要
@@ -279,7 +264,7 @@ def get_vote(post_id: int):
     """指定したidの投稿への投票を取得する"""
     if g.user is None:
         return None
-    
+
     vote = get_db().execute(
         'SELECT * FROM vote '
         ' WHERE post_id = ? AND user_id = ?',

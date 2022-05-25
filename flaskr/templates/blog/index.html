@@ -11,14 +11,14 @@
   {% for post in posts %}
     <article class="pure-g">
       <header class="pure-u-1">
-          <div class="article-date">{{ post['created'].strftime('%Y-%m-%d %H:%M') }}</div>
-          <h2 class="article-title">{{ post['title'] }}</h2>
-          <p class="article-user">by {{ post['username'] }}</p>
-          <p class="article-comment">comment({{ post['comment_count'] }})</p>
-          <p>賛成({{ post['agree'] }})/反対({{ post.disagree }})</p>
+          <div class="article-date">{{ post.created.strftime('%Y-%m-%d %H:%M') }}</div>
+          <h2 class="article-title">{{ post.title }}</h2>
+          <p class="article-user">by {{ post.author_name }}</p>
+          <p class="article-comment">comment({{ post.comment_count | default('0', true) }})</p>
+          <p>賛成({{ post.agree | default('0', true) }}) 反対({{ post.disagree | default('0', true) }})</p>
       </header>
       <section class="pure-u-1">
-        <p>{{ post['body'][:20] }}...</p>
+        <p>{{ post.body[:30] }}...</p>
         <a href="{{ url_for('blog.article', id=post['id']) }}" class="pure-button">Read</a>
       </section>
     </article>
