@@ -17,7 +17,7 @@ def test_index(client: testing.FlaskClient, auth: AuthAction):
     assert b'Login' in res.data
     assert b'Register' in res.data
     assert b'/1' in res.data
-    assert '賛成(0)/反対(0)' in res.get_data(as_text=True)
+    assert '賛成(0) 反対(0)' in res.get_data(as_text=True)
 
     auth.login()
     res = client.get('/')
