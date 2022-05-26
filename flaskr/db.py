@@ -26,11 +26,19 @@ def close_db(e=None):
 
 
 # データベースを初期化
-# 接続して指定したファイルを実行する
+# テーブル定義とビュー定義データの読み込みと実行
 def init_db():
     db = get_db()
 
     with current_app.open_resource('schema.sql') as f:
+        db.executescript(f.read().decode('utf8'))
+
+
+# 開発用の初期データの読み込みと実行
+def insert_init_data():
+    db = get_db()
+
+    with current_app.open_resource('initdata.sql') as f:
         db.executescript(f.read().decode('utf8'))
 
 
@@ -43,8 +51,18 @@ def init_db_command():
     click.echo('Initialized the database.')
 
 
+# 開発用初期データの挿入も含んだカスタムコマンドの定義
+@click.command('init-db-data')
+@with_appcontext
+def init_db_data_command():
+    init_db()
+    insert_init_data()
+    click.echo('Initialized the database and insert initial data.')
+
+
 # カスタムコマンドをアプリケーション（のインスタンス）に登録する関数
 # アプリケーションのインスタンスに対して設定する
 def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
+    app.cli.add_command(init_db_data_command)
