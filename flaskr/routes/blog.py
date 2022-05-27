@@ -24,13 +24,12 @@ def search():
     '''一覧ページで作者名で記事を検索する'''
     db = get_db()
     if author := request.args.get('author'):
-        print(author)
         posts = db.execute(
             'SELECT * FROM all_posts '
             ' WHERE author_name LIKE ?;',
             (f'%{author}%',)
-        )
-        return render_template('blog/index.html', posts=posts)
+        ).fetchall()
+        return render_template('blog/search.html', posts=posts, author=author)
 
     return index()
 
