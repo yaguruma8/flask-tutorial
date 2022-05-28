@@ -22,16 +22,20 @@ def index():
 @bp.get('/search')
 def search():
     '''一覧ページで作者名で記事を検索する'''
-    db = get_db()
     if (author := request.args.get('author')) is not None:
-        posts = db.execute(
-            'SELECT * FROM all_posts '
-            ' WHERE author_name LIKE ?;',
-            (f'%{author}%',)
-        ).fetchall()
+        if author == '':
+            posts = []
+            flash('検索条件を指定してください')
+        else:
+            posts = get_db().execute(
+                'SELECT * FROM all_posts '
+                ' WHERE author_name LIKE ?;',
+                (f'%{author}%',)
+            ).fetchall()
+
         return render_template('blog/search.html', posts=posts, author=author)
 
-    return index()
+    return redirect(url_for('blog.index'))
 
 
 # blog.article  /<int:id>  記事の詳細の表示
