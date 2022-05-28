@@ -23,7 +23,7 @@ def index():
 def search():
     '''一覧ページで作者名で記事を検索する'''
     db = get_db()
-    if author := request.args.get('author'):
+    if (author := request.args.get('author')) is not None:
         posts = db.execute(
             'SELECT * FROM all_posts '
             ' WHERE author_name LIKE ?;',
