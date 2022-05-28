@@ -18,6 +18,26 @@ def index():
     return render_template('blog/index.html', posts=posts)
 
 
+# # blog.search   /search?author=value  一覧での作者の検索
+@bp.get('/search')
+def search():
+    '''一覧ページで作者名で記事を検索する'''
+    if (author := request.args.get('author')) is not None:
+        if author == '':
+            posts = []
+            flash('検索条件を指定してください')
+        else:
+            posts = get_db().execute(
+                'SELECT * FROM all_posts '
+                ' WHERE author_name LIKE ?;',
+                (f'%{author}%',)
+            ).fetchall()
+
+        return render_template('blog/search.html', posts=posts, author=author)
+
+    return redirect(url_for('blog.index'))
+
+
 # blog.article  /<int:id>  記事の詳細の表示
 @bp.get('/<int:id>')
 def article(id: int):

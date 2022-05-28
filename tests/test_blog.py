@@ -276,3 +276,35 @@ def test_vote_cancel(app: Flask, client: testing.FlaskClient, auth: AuthAction):
     # 重複して削除しようとした場合はエラーになる
     res = client.post('/1/vote/cancel')
     assert b'you are not vote.' in res.data
+
+
+def test_author_search(app: Flask, client: testing.FlaskClient):
+    '''投稿者の検索のテスト'''
+    # preprocess
+    with app.app_context():
+        db = get_db()
+        db.execute(
+            'INSERT INTO post (title, body, author_id, created) '
+            ' VALUES ("test title2", "test2", 2, "2018-01-01 00:00:00");'
+        )
+        db.commit()
+    # 投稿者名（全文一致）
+    res = client.get('/search?author=test')
+    assert '1件' in res.get_data(as_text=True)
+
+    # 投稿者名（一部一致）
+    res = client.get('/search?author=t')
+    assert '2件' in res.get_data(as_text=True)
+
+    # 投稿者名が存在しなければ0件
+    res = client.get('/search?author=hoge')
+    assert '0件' in res.get_data(as_text=True)
+
+    # クエリパラメータのkeyが異なる場合はindexにリダイレクト
+    res = client.get('/search?hoge=fuga')
+    assert res.headers['Location'] == '/'
+
+    # 空白で送信した場合は0件+flash
+    res = client.get('/search?author=')
+    assert '0件' in res.get_data(as_text=True)
+    assert '検索条件を指定してください' in res.get_data(as_text=True)
