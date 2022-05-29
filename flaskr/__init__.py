@@ -1,4 +1,4 @@
-import os
+import os, re
 from flask import Flask, Markup
 
 from markdown import markdown
@@ -48,5 +48,9 @@ def create_app(test_config=None):
     @app.template_filter('markdown')
     def markdown_filter(str):
         return markdown(Markup.escape(str))
+
+    @app.template_filter('remove_tag')
+    def remove_tag_filter(str):
+        return re.sub('<.+?>', ' ', str)
 
     return app
