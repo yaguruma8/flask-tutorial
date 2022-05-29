@@ -308,3 +308,23 @@ def test_author_search(app: Flask, client: testing.FlaskClient):
     res = client.get('/search?author=')
     assert '0件' in res.get_data(as_text=True)
     assert '検索条件を指定してください' in res.get_data(as_text=True)
+
+
+def test_markdown_view(app: Flask, client: testing.FlaskClient):
+    '''本文のmarkdownの表示のテスト'''
+    # preprocess
+    with app.app_context():
+        db = get_db()
+        db.execute(
+            'INSERT INTO post (title, body, author_id, created) '
+            ' VALUES ("markdown test", "# hoge", 1, "2018-01-01 00:00:00");'
+        )
+        db.commit()
+
+    # 記事詳細ではmarkdownに変換されている
+    res = client.get('/2')
+    assert b'<h1>hoge</h1>' in res.data
+
+    # 記事一覧ではmarkdownの部分が取り除かれている
+    res = client.get('/')
+    assert b'# hoge' not in res.data
