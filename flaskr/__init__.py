@@ -1,7 +1,7 @@
 import os, re
 from flask import Flask, Markup
 
-from markdown import markdown
+from markdown2 import markdown
 
 
 # Flaskインスタンスを作成するファクトリ関数
