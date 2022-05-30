@@ -47,7 +47,7 @@ def create_app(test_config=None):
     # テンプレートのカスタムフィルターを登録
     @app.template_filter('markdown')
     def markdown_filter(str):
-        return markdown(Markup.escape(str))
+        return markdown(Markup.escape(str), extras=['tables'])
 
     @app.template_filter('remove_tag')
     def remove_tag_filter(str):
