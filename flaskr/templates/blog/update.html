@@ -5,16 +5,18 @@
 {% endblock %}
 
 {% block content %}
-  <form method="post" class="pure-form pure-form-stacked">
+  {# 編集 #}
+  <form method="post">
     <label for="title">Title</label>
     <input name="title" id="title"
-      value="{{ request.form['title'] or post['title'] }}" class="pure-input-1" required>
+      value="{{ request.form['title'] or post['title'] }}" required>
     <label for="body">Body</label>
-    <textarea name="body" id="body" class="pure-input-1">{{ request.form['body'] or post['body'] }}</textarea>
-    <button type="submit" class="pure-button pure-button-primary">Save</button>
+    <textarea name="body" id="body">{{ request.form['body'] or post['body'] }}</textarea>
+    <button type="submit">Save</button>
   </form>
   <hr>
-  <form action="{{ url_for('blog.delete_post', id=post['id']) }}" method="post" class="pure-form pure-form-stacked">
-    <button type="submit" onclick="return confirm('Are you sure?');" class="pure-button pure-button-primary button-danger">Delete Post</button>
+  {# 削除 #}
+  <form action="{{ url_for('blog.delete_post', id=post['id']) }}" method="post">
+    <button type="submit" onclick="return confirm('Are you sure?');">Delete Post</button>
   </form>
 {% endblock %}
