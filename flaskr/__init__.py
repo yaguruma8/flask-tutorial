@@ -1,5 +1,7 @@
-import os
-from flask import Flask
+import os, re
+from flask import Flask, Markup
+
+from markdown2 import markdown
 
 
 # Flaskインスタンスを作成するファクトリ関数
@@ -41,5 +43,14 @@ def create_app(test_config=None):
     from .routes import blog
     app.register_blueprint(blog.bp)
     app.add_url_rule('/', endpoint='index')
+
+    # テンプレートのカスタムフィルターを登録
+    @app.template_filter('markdown')
+    def markdown_filter(str):
+        return markdown(Markup.escape(str), extras=['tables'])
+
+    @app.template_filter('remove_tag')
+    def remove_tag_filter(str):
+        return re.sub('<.+?>', ' ', str)
 
     return app

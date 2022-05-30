@@ -10,9 +10,9 @@
         {# 日時、投稿者名 #}
         {% include "blog/article/header.html" %}
       </header>
-      <section class="pure-u-1">
+      <section class="pure-u-1 article-body">
         {# 本文 #}
-        <p class="article-body">{{ post['body'] }}</p>
+        {{ post['body'] | markdown | safe }}
         {% if g.user['id'] == post['author_id'] %}
         <a href="{{ url_for('blog.update', id=post['id']) }}" class="pure-button pure-button-primary">Edit</a>
         {% endif %}
