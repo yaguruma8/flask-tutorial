@@ -4,40 +4,42 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/purecss@2.1.0/build/pure-min.css" integrity="sha384-yHIFVG6ClnONEA5yB5DJXfW2/KC173DIQrYoZMEtBvGzmf0PKiGyNEqe9N6BNDBH" crossorigin="anonymous">  
-    <link rel="stylesheet" href="https://unpkg.com/purecss@2.1.0/build/grids-responsive-min.css" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    {# <link rel="stylesheet" href="https://unpkg.com/purecss@2.1.0/build/pure-min.css" integrity="sha384-yHIFVG6ClnONEA5yB5DJXfW2/KC173DIQrYoZMEtBvGzmf0PKiGyNEqe9N6BNDBH" crossorigin="anonymous">  
+    <link rel="stylesheet" href="https://unpkg.com/purecss@2.1.0/build/grids-responsive-min.css" /> #}
+    {# <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" /> #}
     <title>{% block title %}{% endblock %} - Flaskr</title>
   <head>
   <body>
-    <div class="menu-container">
-      <nav class="pure-menu pure-menu-horizontal menu-base">
-        <a href="{{ url_for('blog.index') }}" class="pure-menu-heading pure-menu-link">Flaskr</a>
-        <ul class="pure-menu-list menu-list">
-          {% if g.user %}
-            <li class="pure-menu-item"><span>{{ g.user['username'] }} [id:{{ g.user['id'] }}]</span></li>
-            <li class="pure-menu-item"><a href="{{ url_for('auth.logout') }}" class="pure-menu-link">Logout</a></li>
-          {% else %}
-            <li class="pure-menu-item"><a href="{{ url_for('auth.register') }}" class="pure-menu-link">Register</a></li>
-            <li class="pure-menu-item"><a href="{{ url_for('auth.login') }}" class="pure-menu-link">Login</a></li>
-          {% endif %}
-        </ul>
-      </nav>
+    {# 上部ナビゲーション #}
+    <nav style="background:lightgray;border:1px solid black;">
+      <a href="{{ url_for('blog.index') }}">Flaskr</a>
+      {# 検索ボックス #}
+      <form method="get" action="/search">
+        <input type="text" name="author">
+        <button type="submit">author search</button>
+      </form>
+      <ul>
+        {% if g.user %}
+          <li><span>{{ g.user['username'] }} [id:{{ g.user['id'] }}]</span></li>
+          <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('auth.register') }}">Register</a></li>
+          <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+    {# ページタイトルヘッダー #}
+    <header style="background: lightblue;border: 1px solid black;">
+      {% block header %}{% endblock %}
+    </header>
+    {% for message in get_flashed_messages() %}
+    <div>
+      {{ message }}
     </div>
-    <main>
-      <header>
-        {% block header %}{% endblock %}
-      </header>
-      {% for message in get_flashed_messages() %}
-        <div>
-          {{ message }}
-        </div>
-      {% endfor %}
-      <section class="content-container">
-        {% block content %}
-          <!-- content -->
-        {% endblock %}
-      </section>
+    {% endfor %}
+    {# 本文 #}
+    <main style="border: 1px solid black;">
+      {% block content %}{% endblock %}
     </main>
   </body>
 </html>

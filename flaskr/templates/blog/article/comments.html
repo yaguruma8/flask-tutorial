@@ -1,21 +1,32 @@
+{# コメント投稿フォーム #}
+{% if g.user %}
+  <form method="post"
+  action="{{ url_for('blog.comment_create_post', id=post['id']) }}">
+    <label for="body">コメントする(40字以内)</label>
+      <input type="text" name="body" id="body" maxlength="40">
+    <button type="submit">comment</button>
+  </form>
+{% endif %}
+
+{# コメント一覧 #}
 <p>コメント({{ comments | length }})</p>
 {% for comment in comments %}
-  <div class="comment-body">
-    {{ comment['body']}} : 
-    {{ comment['created']}} : 
-    {{ comment['username']}} : 
-    {% if g.user['id'] == comment['commenter_id'] %}
-    <form 
-      action="{{ url_for('blog.comment_delete_post', id=comment['post_id']) }}"
-      method="post"
-    >
-      <button
-        type="submit"
-        onclick="return confirm('Are you sure?');"
-        name="comment_id" value="{{ comment['id'] }}">
-          削除
-      </button>
-    </form>
-    {% endif %}
-  </div>
+<div>
+  {{ comment['body']}} : 
+  {{ comment['created']}} : 
+  {{ comment['username']}} : 
+  {% if g.user['id'] == comment['commenter_id'] %}
+  <form 
+    action="{{ url_for('blog.comment_delete_post', id=comment['post_id']) }}"
+    method="post"
+  >
+    <button
+      type="submit"
+      onclick="return confirm('Are you sure?');"
+      name="comment_id" value="{{ comment['id'] }}">
+        削除
+    </button>
+  </form>
+  {% endif %}
+</div>
 {% endfor %}
